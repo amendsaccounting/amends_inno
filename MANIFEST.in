@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include amends_inno *.css
+recursive-include amends_inno *.csv
+recursive-include amends_inno *.html
+recursive-include amends_inno *.ico
+recursive-include amends_inno *.js
+recursive-include amends_inno *.json
+recursive-include amends_inno *.md
+recursive-include amends_inno *.png
+recursive-include amends_inno *.py
+recursive-include amends_inno *.svg
+recursive-include amends_inno *.txt
+recursive-exclude amends_inno *.pyc
