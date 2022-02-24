@@ -408,7 +408,7 @@ def get_items(filters, additional_query_columns):
 
 
 def calculate_item_stock_qty():
-	data=frappe.db.sql("""select sum(stock_qty) as foc,`tabSales Invoice Item`.name from `tabSales Invoice` inner join `tabSales Invoice Item` on `tabSales Invoice Item`.parent=`tabSales Invoice`.name where warehouse like '%FOC Store - BEPL%' group by `tabSales Invoice Item`.item_code,`tabSales Invoice`.name""",as_dict=1)
+	data=frappe.db.sql("""select sum(stock_qty) as foc,`tabSales Invoice Item`.name from `tabSales Invoice` inner join `tabSales Invoice Item` on `tabSales Invoice Item`.parent=`tabSales Invoice`.name where warehouse like '%FOC Store - IM%' group by `tabSales Invoice Item`.item_code,`tabSales Invoice`.name""",as_dict=1)
 	return data
 
 def get_delivery_notes_against_sales_order(item_list):
