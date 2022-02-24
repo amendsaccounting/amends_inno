@@ -529,6 +529,6 @@ def get_total_foc_count(invoice_list):
 	total_count = {}
 	if invoice_list:
 		inv_mop = frappe.db.sql("""select sum(stock_qty) as foc,parent
-			from `tabSales Invoice Item` where warehouse like '%FOC Store - BEPL%' group by parent,warehouse""",as_dict=1) #%','.join(['%s']*len(invoice_list)), tuple(invoice_list), as_dict=1)
+			from `tabSales Invoice Item` where warehouse like '%FOC Store - IM%' group by parent,warehouse""",as_dict=1) #%','.join(['%s']*len(invoice_list)), tuple(invoice_list), as_dict=1)
 
 	return inv_mop
