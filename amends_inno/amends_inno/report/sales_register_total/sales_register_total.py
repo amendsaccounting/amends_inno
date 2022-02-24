@@ -40,7 +40,7 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 	for inv in invoice_list:
 		# invoice details
 		# foc_quantity=select COUNT(*) from `tabSales Invoice Item` group by warehouse
-		# foc_quantity = frappe.db.get_list('tabSales Invoice Item',filters={"warehouse":"FOC Store - BEPL"},fields=["warehouse"])
+		# foc_quantity = frappe.db.get_list('tabSales Invoice Item',filters={"warehouse":"FOC Store - IM"},fields=["warehouse"])
 
 
 		sales_order = list(set(invoice_so_dn_map.get(inv.name, {}).get("sales_order", [])))
