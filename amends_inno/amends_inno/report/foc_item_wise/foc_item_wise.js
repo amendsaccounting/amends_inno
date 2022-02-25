@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Items-wise Sales Register"] = {
+frappe.query_reports["FOC Item wise"] = {
 	"filters": [
 		{
 			"fieldname":"from_date",
