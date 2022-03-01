@@ -40,6 +40,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 	customer_details = get_customer_details()
 	item_details = get_item_details()
 	for d in item_list:
+		print(d,"/////")
 		customer_record = customer_details.get(d.customer)
 		item_record = item_details.get(d.item_code)
 
@@ -129,7 +130,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		add_sub_total_row(total_row, total_row_map, 'total_row', tax_columns)
 		data.append(total_row_map.get('total_row'))
 		skip_total_row = 1
-	print(calculate_item_stock_qty(),"++++++")
+	# print(calculate_item_stock_qty(),"++++++")
 	return columns, data, None, None, None, skip_total_row
 
 def get_columns(additional_table_columns, filters):
@@ -360,6 +361,9 @@ def get_conditions(filters):
 	if filters.get("item_group"):
 		conditions +=  """and ifnull(`tabSales Invoice Item`.item_group, '') = %(item_group)s"""
 
+	if not filters.get("mode_of_payment") and not filters.get("warehouse") and not filters.get("brand") and not filters.get("item_group") and not filters.get("group_by"):
+		conditions += "GROUP BY `tabSales Invoice Item`.parent,`tabSales Invoice Item`.warehouse,`tabSales Invoice Item`.item_code "
+
 	if not filters.get("group_by"):
 		conditions += "ORDER BY `tabSales Invoice`.posting_date desc, `tabSales Invoice Item`.item_group desc"
 	else:
@@ -376,6 +380,7 @@ def get_group_by_conditions(filters, doctype):
 		return "ORDER BY `tab{0} Item`.{1}".format(doctype, frappe.scrub(filters.get('group_by')))
 	elif filters.get("group_by") in ('Customer', 'Customer Group', 'Territory', 'Supplier'):
 		return "ORDER BY `tab{0}`.{1}".format(doctype, frappe.scrub(filters.get('group_by')))
+	 
 
 def get_items(filters, additional_query_columns):
 	conditions = get_conditions(filters)
@@ -384,7 +389,9 @@ def get_items(filters, additional_query_columns):
 		additional_query_columns = ', ' + ', '.join(additional_query_columns)
 	else:
 		additional_query_columns = ''
-
+	stock_quantity = "`tabSales Invoice Item`.stock_qty"
+	if "GROUP BY `tabSales Invoice Item`.parent,`tabSales Invoice Item`.warehouse,`tabSales Invoice Item`.item_code " in conditions:
+		stock_quantity = "sum(`tabSales Invoice Item`.stock_qty) as stock_qty"
 	return frappe.db.sql("""
 		select
 			`tabSales Invoice Item`.name, `tabSales Invoice Item`.parent,
@@ -397,18 +404,18 @@ def get_items(filters, additional_query_columns):
 			`tabSales Invoice Item`.`item_name`, `tabSales Invoice Item`.`item_group`,
 			`tabSales Invoice Item`.sales_order, `tabSales Invoice Item`.delivery_note,
 			`tabSales Invoice Item`.income_account, `tabSales Invoice Item`.cost_center,
-			`tabSales Invoice Item`.stock_qty, `tabSales Invoice Item`.stock_uom,
+			{2}, `tabSales Invoice Item`.stock_uom,
 			`tabSales Invoice Item`.base_net_rate, `tabSales Invoice Item`.base_net_amount,
 			`tabSales Invoice`.customer_name, `tabSales Invoice`.customer_group, `tabSales Invoice Item`.so_detail,
 			`tabSales Invoice`.update_stock, `tabSales Invoice Item`.uom, `tabSales Invoice Item`.qty {0}
 		from `tabSales Invoice`, `tabSales Invoice Item`
 		where `tabSales Invoice`.name = `tabSales Invoice Item`.parent
 			and `tabSales Invoice`.docstatus = 1 {1}
-		""".format(additional_query_columns or '', conditions), filters, as_dict=1) #nosec
+		""".format(additional_query_columns or '', conditions, stock_quantity), filters, as_dict=1) #nosec
 
 
 def calculate_item_stock_qty():
-	data=frappe.db.sql("""select sum(stock_qty) as foc,`tabSales Invoice Item`.name from `tabSales Invoice` inner join `tabSales Invoice Item` on `tabSales Invoice Item`.parent=`tabSales Invoice`.name where warehouse like '%FOC Store - IM%' group by `tabSales Invoice Item`.item_code,`tabSales Invoice`.name""",as_dict=1)
+	data=frappe.db.sql("""select sum(stock_qty) as foc,`tabSales Invoice Item`.name from `tabSales Invoice` inner join `tabSales Invoice Item` on `tabSales Invoice Item`.parent=`tabSales Invoice`.name where warehouse like '%%FOC Store - IM%' group by `tabSales Invoice Item`.item_code,`tabSales Invoice`.name""",as_dict=1)
 	return data
 
 def get_delivery_notes_against_sales_order(item_list):
